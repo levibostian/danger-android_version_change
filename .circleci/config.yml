@@ -1,0 +1,95 @@
+version: 2
+jobs:
+  dependencies:
+    working_directory: ~/code
+    docker:
+      - image: circleci/ruby:2.3
+    steps:
+      - checkout
+      - restore_cache:
+          key: Gemfile-{{ checksum "Gemfile.lock" }}
+      - run:
+          name: Bundle Install
+          command: bundle install --path vendor/bundle
+      - type: cache-save
+        name: Store bundle cache
+        key: Gemfile-{{ checksum "Gemfile.lock" }}
+        paths:
+          - vendor/bundle
+  danger:
+    docker:
+      - image: dantoml/danger:latest
+    steps:
+      - checkout
+      - run: ./assert_danger_running_on_pr.sh
+      - run: bundle install
+      - run: '[ ! -z $DANGER_GITHUB_API_TOKEN ] && danger || echo "Skipping Danger for External Contributor"'
+  test-lint:
+    working_directory: ~/code
+    docker:
+      - image: circleci/ruby:2.3
+    steps:
+      - checkout
+      - restore_cache:
+          key: Gemfile-{{ checksum "Gemfile.lock" }}
+      - run:
+          name: Bundle Install
+          command: bundle install --path vendor/bundle
+      - run:
+          name: run tests and lint
+          command: bundle exec rake spec
+      - store_test_results:
+          path: test_results
+      - run:
+          name: Danger lint to make sure it can be published
+          command: bundle exec danger plugins lint
+  build-gem:
+    working_directory: ~/code
+    docker:
+      - image: circleci/ruby:2.3
+    steps:
+      - checkout
+      - restore_cache:
+          key: Gemfile-{{ checksum "Gemfile.lock" }}
+      - run:
+          name: Bundle Install
+          command: bundle install --path vendor/bundle
+      - run: gem build danger-android_version_change.gemspec
+  deploy:
+    working_directory: ~/code
+    docker:
+      - image: circleci/ruby:2.3
+    steps:
+      - checkout
+      - restore_cache:
+          key: Gemfile-{{ checksum "Gemfile.lock" }}
+      - run:
+          name: Bundle Install
+          command: bundle install --path vendor/bundle
+      - run:
+          name: Generate README.md docs
+          command: rm README.md; cat README_header.md > README.md; bundle exec danger plugins readme >> README.md; cat README_footer.md >> README.md
+      - run:
+          name: Create rubygems credientials file
+          command: mkdir ~/.gem; printf "%s\n%s " "---" ":rubygems_api_key:" > ~/.gem/credentials; printf $RUBYGEMS_KEY >> ~/.gem/credentials;chmod 0600 ~/.gem/credentials
+      - run: gem build danger-android_version_change.gemspec; gem push danger-android_version_change*.gem
+workflows:
+  version: 2
+  test-lint:
+    jobs:
+      - danger
+      - dependencies
+      - test-lint:
+          requires:
+            - dependencies
+      - build-gem:
+          requires:
+            - test-lint
+  deploy:
+    jobs:
+      - deploy:
+          filters: # Only runs for tags.
+            tags:
+              only: /.*/
+            branches:
+              ignore: /.*/

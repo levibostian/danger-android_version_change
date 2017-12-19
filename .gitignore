@@ -1,0 +1,8 @@
+# manually added
+test_results/
+danger-*.gem
+
+.DS_Store
+pkg
+.idea/
+.yardoc

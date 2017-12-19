@@ -1,0 +1,15 @@
+diff --git a/Foo/app/build.gradle b/Foo/app/build.gradle
+index de56abf..994a384 100644
+--- a/Foo/app/build.gradle
++++ b/Foo/app/build.gradle
+@@ -15,18 +15,18 @@
+apply plugin: 'com.android.application'
+
+repositories {
+    maven { url 'https://maven.google.com' }
+}
+
+android {
+    defaultConfig {
+-        versionCode whateverDoesntMatter
++        versionCode whateverDoesntMatter

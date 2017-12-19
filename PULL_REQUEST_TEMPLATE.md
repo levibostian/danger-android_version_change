@@ -1,0 +1,3 @@
+- [ ] Update `lib/android_version_change/gem_version.rb` to latest version. Bump it!
+- [ ] Tests all pass.
+- [ ] After merge, make a git tag release.
