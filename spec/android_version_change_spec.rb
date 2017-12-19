@@ -15,8 +15,8 @@ module Danger
       # You should replace these with your own.
 
       it "Cannot find build.gradle file" do
-        @my_plugin.assert_version_changed_diff("Foo/Bar/build.gradle", "versionName")
-        expect(@dangerfile.status_report[:errors]).to eq(["buld.gradle at path Foo/Bar/buld.gradle does not exist."])
+        @my_plugin.assert_version_changed("Foo/Bar/build.gradle", "versionName")
+        expect(@dangerfile.status_report[:errors]).to eq(["build.gradle file at path Foo/Bar/build.gradle does not exist."])
       end
 
       it "Fails from an empty git diff message" do
