@@ -20,6 +20,8 @@ module Danger
       "android_version_change"
     end
 
+    DEFAULT_BUILD_GRADLE_FILE_PATH = "app/build.gradle".freeze
+
     def initialize(dangerfile)
       super(dangerfile)
     end
@@ -42,14 +44,12 @@ module Danger
     # (Internal use) Takes path to build.gradle as well as "versionName" or "versionCode" string to check for change.
     # @return [void]
     def assert_version_changed(override_build_gradle_file_path, name_or_code)
-      build_gradle_file_path = override_build_gradle_file_path || "app/build.gradle"
-
-      unless File.file?(build_gradle_file_path)
-        fail "build.gradle file at path " + build_gradle_file_path + " does not exist."
+      unless File.file?(override_build_gradle_file_path)
+        fail "build.gradle file at path " + override_build_gradle_file_path + " does not exist."
         return # rubocop:disable UnreachableCode
       end
 
-      unless git.diff_for_file(build_gradle_file_path) # No diff found for build.gradle file.
+      unless git.diff_for_file(override_build_gradle_file_path) # No diff found for build.gradle file.
         fail "You did not edit your build.gradle file at all. Therefore, you did not change the " + name_or_code + "."
         return # rubocop:disable UnreachableCode
       end
@@ -70,7 +70,7 @@ module Danger
     # @param [String] override_build_gradle_file_path
     #        (optional) Path to build.gradle file for Android project that versionName is located in.
     # @return [void]
-    def assert_version_name_changed(override_build_gradle_file_path)
+    def assert_version_name_changed(override_build_gradle_file_path = DEFAULT_BUILD_GRADLE_FILE_PATH)
       assert_version_changed(override_build_gradle_file_path, "versionName")
     end
 
@@ -86,7 +86,7 @@ module Danger
     # @param [String] override_build_gradle_file_path
     #        (optional) Path to build.gradle file for Android project that versionCode is located in.
     # @return [void]
-    def assert_version_code_changed(override_build_gradle_file_path)
+    def assert_version_code_changed(override_build_gradle_file_path = DEFAULT_BUILD_GRADLE_FILE_PATH)
       assert_version_changed(override_build_gradle_file_path, "versionCode")
     end
   end

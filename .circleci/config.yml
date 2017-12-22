@@ -23,7 +23,7 @@ jobs:
       - checkout
       - run: ./assert_danger_running_on_pr.sh
       - run: bundle install
-      - run: '[ ! -z $DANGER_GITHUB_API_TOKEN ] && danger || echo "Skipping Danger for External Contributor"'
+      - run: '[ ! -z $DANGER_GITHUB_API_TOKEN ] && danger --fail-on-errors=true || echo "Skipping Danger for External Contributor"'
   test-lint:
     working_directory: ~/code
     docker:
