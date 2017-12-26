@@ -43,18 +43,18 @@ module Danger
 
     # (Internal use) Takes path to build.gradle as well as "versionName" or "versionCode" string to check for change.
     # @return [void]
-    def assert_version_changed(override_build_gradle_file_path, name_or_code)
-      unless File.file?(override_build_gradle_file_path)
-        fail "build.gradle file at path " + override_build_gradle_file_path + " does not exist."
+    def assert_version_changed(build_gradle_file_path, name_or_code)
+      unless File.file?(build_gradle_file_path)
+        fail "build.gradle file at path " + build_gradle_file_path + " does not exist."
         return # rubocop:disable UnreachableCode
       end
 
-      unless git.diff_for_file(override_build_gradle_file_path) # No diff found for build.gradle file.
+      unless git.diff_for_file(build_gradle_file_path) # No diff found for build.gradle file.
         fail "You did not edit your build.gradle file at all. Therefore, you did not change the " + name_or_code + "."
         return # rubocop:disable UnreachableCode
       end
 
-      git_diff_string = git.diff_for_file(info_plist_file_path).patch
+      git_diff_string = git.diff_for_file(build_gradle_file_path).patch
       assert_version_changed_diff(git_diff_string, name_or_code)
     end
 
